@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PandaPages</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #d4d4d4;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 18px;
+      margin: 2rem;
+    }
+    h1 {
+      color: #3cfba2;
+      margin-bottom: 0;
+    }
+    .subtitle {
+      color: #7f8c8d;
+      margin-top: 0;
+      margin-bottom: 2rem;
+    }
+    .composer {
+      background-color: #1a1a1a;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      background-color: #0d0d0d;
+      color: #d4d4d4;
+      border: 1px solid #3cfba2;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 18px;
+      resize: vertical;
+    }
+    button {
+      margin-top: 0.5rem;
+      padding: 0.3rem 0.8rem;
+      background-color: #2c2c34;
+      color: #d4d4d4;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #3a3a44;
+    }
+    .feed {
+      margin-top: 2rem;
+    }
+    .feed h2 {
+      margin-bottom: 1rem;
+    }
+    .entry {
+      background-color: #1a1a1a;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .timestamp {
+      color: #3cfba2;
+      font-size: 14px;
+      margin-bottom: 0.5rem;
+    }
+    .delete {
+      float: right;
+      color: #7f8c8d;
+      cursor: pointer;
+    }
+    .delete:hover {
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <h1>PandaPages</h1>
+  <p class="subtitle">// A tranquil space for your thoughts.</p>
+
+  <div class="composer">
+    <textarea id="entryInput" placeholder="> What's on your mind..."></textarea>
+    <br />
+    <button onclick="addEntry()">Post</button>
+    <p style="color:#7f8c8d; font-size:14px;">Press Ctrl+Enter or Cmd+Enter to post</p>
+  </div>
+
+  <div class="feed">
+    <h2>// Entry Feed</h2>
+    <div id="entries"></div>
+  </div>
+
+  <script>
+    const input = document.getElementById('entryInput');
+    const entriesDiv = document.getElementById('entries');
+
+    function loadEntries() {
+      const entries = JSON.parse(localStorage.getItem('pandapages_entries')) || [];
+      entriesDiv.innerHTML = '';
+      if (entries.length === 0) {
+        entriesDiv.innerHTML = '<p>No entries yet – write something above.</p>';
+      } else {
+        entries.forEach((entry, index) => {
+          const entryEl = document.createElement('div');
+          entryEl.className = 'entry';
+          entryEl.innerHTML = `<span class="delete" onclick="deleteEntry(${index})">✕</span>
+            <div class="timestamp">${entry.time}</div>
+            <div class="content">${entry.text}</div>`;
+          entriesDiv.appendChild(entryEl);
+        });
+      }
+    }
+
+    function addEntry() {
+      const text = input.value.trim();
+      if (text === '') return;
+      const now = new Date();
+      const timestamp = now.toLocaleString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit', second: '2-digit'
+      });
+      const entries = JSON.parse(localStorage.getItem('pandapages_entries')) || [];
+      entries.unshift({ text, time: timestamp });
+      localStorage.setItem('pandapages_entries', JSON.stringify(entries));
+      input.value = '';
+      loadEntries();
+    }
+
+    function deleteEntry(index) {
+      const entries = JSON.parse(localStorage.getItem('pandapages_entries')) || [];
+      entries.splice(index, 1);
+      localStorage.setItem('pandapages_entries', JSON.stringify(entries));
+      loadEntries();
+    }
+
+    input.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        addEntry();
+      }
+    });
+
+    loadEntries();
+  </script>
+</body>
+</html>
+
